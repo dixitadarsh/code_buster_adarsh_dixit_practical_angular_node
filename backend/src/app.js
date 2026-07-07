@@ -3,57 +3,61 @@ const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 
+const logger = require("./utils/logger");
+const security = require("./config/security");
+
+const responseMiddleware = require("./helpers/response");
+const errorMiddleware = require("./middleware/error.middleware");
+const notFoundMiddleware = require("./middleware/notFount.middleware");
+const requestIdMiddleware = require("./middleware/requestId.middleware");
+const requestLoggerMiddleware = require("./middleware/requestLogger.middleware");
+
+/* ============================================
+    ROUTES IMPORT
+=============================================*/
+const authRoutes = require("./modules/auth/auth.routes");
+const userRoutes = require("./modules/users/user.routes");
+
+
 const app = express();
 
 // Security Middlewares
-app.use(helmet());
-app.use(cors());
-
-// Rate Limiter
 app.use(
-    rateLimit({
-        windowMs: 15 * 60 * 1000, // 15 minutes
-        max: 100,
-        standardHeaders: true,
-        legacyHeaders: false,
-    })
+  cors({
+    origin: process.env.CLIENT_URL || "*",
+    credentials: true,
+  })
 );
+
+security(app);
 
 // Body Parsers
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Health Check Route
+//Request Logger
+app.use(requestIdMiddleware);
+app.use(requestLoggerMiddleware);
+
+// Response Helper
+app.use(responseMiddleware);
+
+// After response middleware
+app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/users", userRoutes);
+
+// Health Check
 app.get("/", (req, res) => {
-    res.status(200).json({
-        success: true,
-        message: "Product Management API is running",
-        timestamp: new Date().toISOString(),
-    });
+  return res.success({
+    name: "Product Management API",
+    version: "1.0.0",
+  });
 });
 
-// API Routes
-// app.use("/api/v1/auth", authRoutes);
-// app.use("/api/v1/users", userRoutes);
-// app.use("/api/v1/categories", categoryRoutes);
-// app.use("/api/v1/products", productRoutes);
-
-// 404 Handler
-app.use((req, res) => {
-    res.status(404).json({
-        success: false,
-        message: "Route not found",
-    });
-});
+// 404
+app.use(notFoundMiddleware);
 
 // Global Error Handler
-app.use((err, req, res, next) => {
-    console.error(err);
-
-    res.status(err.statusCode || 500).json({
-        success: false,
-        message: err.message || "Internal Server Error",
-    });
-});
+app.use(errorMiddleware);
 
 module.exports = app;
