@@ -1,0 +1,178 @@
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-white p-6">
+  <div class="mx-auto max-w-lg">
+
+    <!-- Header -->
+    <div class="mb-6 flex items-center justify-between">
+      <div>
+        <h2 class="text-2xl font-bold text-slate-900">
+          {{ isEditMode ? 'Edit Task' : 'Create New Task' }}
+        </h2>
+        <p class="mt-0.5 text-sm text-slate-400">
+          {{ isEditMode ? 'Update the details below' : 'Fill in the details to add a task' }}
+        </p>
+      </div>
+      <button
+        (click)="onClose()"
+        class="rounded-full p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+        aria-label="Close">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-5 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+
+      <!-- Title -->
+      <div>
+        <label for="title" class="mb-1.5 block text-sm font-semibold text-slate-700">
+          Title <span class="text-red-500">*</span>
+        </label>
+        <input
+          id="title"
+          type="text"
+          formControlName="title"
+          placeholder="e.g. Finish landing page design"
+          class="w-full rounded-xl border px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 transition focus:outline-none focus:ring-2"
+          [class.border-slate-200]="!getFieldError('title')"
+          [class.focus:ring-indigo-500]="!getFieldError('title')"
+          [class.border-red-300]="getFieldError('title')"
+          [class.focus:ring-red-400]="getFieldError('title')" />
+        @if (getFieldError('title')) {
+          <p class="mt-1.5 flex items-center gap-1 text-xs font-medium text-red-500">
+            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <circle cx="12" cy="12" r="10" /><path d="M12 8v4M12 16h.01" />
+            </svg>
+            {{ getFieldError('title') }}
+          </p>
+        }
+      </div>
+
+      <!-- Description -->
+      <div>
+        <div class="mb-1.5 flex items-center justify-between">
+          <label for="description" class="block text-sm font-semibold text-slate-700">
+            Description
+          </label>
+          <span class="text-xs text-slate-400">
+            {{ form.get('description')?.value?.length || 0 }}/280
+          </span>
+        </div>
+        <textarea
+          id="description"
+          formControlName="description"
+          placeholder="Add more context about this task..."
+          rows="4"
+          maxlength="280"
+          class="w-full resize-none rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 transition focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </textarea>
+      </div>
+
+      <!-- Due Date -->
+      <div>
+        <label for="dueDate" class="mb-1.5 block text-sm font-semibold text-slate-700">
+          Due Date <span class="text-red-500">*</span>
+        </label>
+        <div class="relative">
+          <svg class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" />
+          </svg>
+          <input
+            id="dueDate"
+            type="date"
+            formControlName="dueDate"
+            class="w-full rounded-xl border px-4 py-2.5 pl-10 text-sm text-slate-800 transition focus:outline-none focus:ring-2"
+            [class.border-slate-200]="!getFieldError('dueDate')"
+            [class.focus:ring-indigo-500]="!getFieldError('dueDate')"
+            [class.border-red-300]="getFieldError('dueDate')"
+            [class.focus:ring-red-400]="getFieldError('dueDate')" />
+        </div>
+        @if (getFieldError('dueDate')) {
+          <p class="mt-1.5 flex items-center gap-1 text-xs font-medium text-red-500">
+            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <circle cx="12" cy="12" r="10" /><path d="M12 8v4M12 16h.01" />
+            </svg>
+            {{ getFieldError('dueDate') }}
+          </p>
+        }
+      </div>
+
+      <!-- Priority -->
+      <div>
+        <label class="mb-2 block text-sm font-semibold text-slate-700">
+          Priority <span class="text-red-500">*</span>
+        </label>
+        <div class="grid grid-cols-3 gap-2">
+          @for (opt of priorityOptions; track opt.value) {
+            <label
+              class="flex cursor-pointer flex-col items-center gap-1.5 rounded-xl border-2 px-3 py-2.5 text-center transition"
+              [class]="form.get('priority')?.value === opt.value
+                ? opt.activeClass
+                : 'border-slate-200 hover:border-slate-300'">
+              <input type="radio" [value]="opt.value" formControlName="priority" class="hidden" />
+              <span [class]="opt.dotClass" class="h-2.5 w-2.5 rounded-full"></span>
+              <span class="text-xs font-semibold text-slate-700">{{ opt.label }}</span>
+            </label>
+          }
+        </div>
+      </div>
+
+      <!-- Tags -->
+      <div>
+        <label for="tags" class="mb-1.5 block text-sm font-semibold text-slate-700">
+          Tags
+        </label>
+        <input
+          id="tags"
+          type="text"
+          formControlName="tagsInput"
+          placeholder="Type a tag and press Enter"
+          (keydown.enter)="$event.preventDefault(); addTag()"
+          class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 transition focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+
+        @if (form.get('tags')?.value?.length) {
+          <div class="mt-2.5 flex flex-wrap gap-1.5">
+            @for (tag of form.get('tags')?.value; track tag) {
+              <span class="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-600">
+                {{ tag }}
+                <button
+                  type="button"
+                  (click)="removeTag(tag)"
+                  class="text-indigo-400 transition hover:text-indigo-700"
+                  aria-label="Remove tag">
+                  ✕
+                </button>
+              </span>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Buttons -->
+      <div class="flex gap-3 border-t border-slate-100 pt-5">
+        <button
+          type="button"
+          (click)="onClose()"
+          class="flex-1 rounded-xl bg-slate-100 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-200">
+          Cancel
+        </button>
+        <button
+          type="submit"
+          [disabled]="form.invalid || isSubmitting()"
+          class="flex-1 rounded-xl bg-gradient-to-r from-red-500 to-rose-500 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:shadow-md disabled:cursor-not-allowed disabled:from-slate-300 disabled:to-slate-300 disabled:shadow-none">
+          @if (isSubmitting()) {
+            <span class="flex items-center justify-center gap-2">
+              <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+              Saving...
+            </span>
+          } @else {
+            {{ isEditMode ? 'Update Task' : 'Create Task' }}
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
