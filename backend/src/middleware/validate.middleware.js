@@ -2,9 +2,9 @@ module.exports = (schema) => {
     return async (req, res, next) => {
         try {
             const validatedData = await schema.parseAsync({
-                body: req.body,
-                query: req.query,
-                params: req.params,
+                body: req.body || {},
+                query: req.query || {},
+                params: req.params || {},
             });
 
             req.body = validatedData.body;

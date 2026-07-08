@@ -4,18 +4,21 @@ const router = express.Router();
 
 const userController = require("./user.controller");
 const userValidation = require("./user.validation");
+const authenticate = require("../../middleware/auth.middleware");
 
 const validate = require("../../middleware/validate.middleware");
 
 // GET All Users
 router.get(
     "/",
+    authenticate,
     userController.findAll
 );
 
 // GET User By Unique Id
 router.get(
     "/:uniqueId",
+    authenticate,
     validate(userValidation.getById),
     userController.findByUniqueId
 );
@@ -23,6 +26,7 @@ router.get(
 // CREATE User
 router.post(
     "/",
+    authenticate,
     validate(userValidation.create),
     userController.create
 );
@@ -30,6 +34,7 @@ router.post(
 // UPDATE User
 router.put(
     "/:uniqueId",
+    authenticate,
     validate(userValidation.update),
     userController.update
 );
@@ -37,6 +42,7 @@ router.put(
 // DELETE User
 router.delete(
     "/:uniqueId",
+    authenticate,
     validate(userValidation.delete),
     userController.delete
 );

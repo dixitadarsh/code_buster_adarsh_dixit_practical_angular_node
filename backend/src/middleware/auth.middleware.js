@@ -1,56 +1,60 @@
-const jwt = require("jsonwebtoken");
+const { verifyAccessToken } = require("../utils/jwt");
 
-const apiError = require("../utils/apiError");
-const HTTP = require("../utils/httpStatus");
-const messages = require("../utils/messages");
-const env = require("../config/env");
+const User = require("../database/models").User;
 
-const { User } = require("../database/models");
 
-module.exports = async (req, res, next) => {
+const authenticate = async (req, res, next) => {
+
     try {
-        let token = req.headers.authorization;
 
-        if (!token || !token.startsWith("Bearer ")) {
-            return next(
-                apiError(
-                    HTTP.UNAUTHORIZED,
-                    messages.TOKEN_REQUIRED
-                )
-            );
+        const token = req.headers.authorization
+            ?.split(" ")[1];
+
+
+        if (!token) {
+            return res.status(401).json({
+                message: "Unauthorized"
+            });
         }
 
-        token = token.split(" ")[1];
 
-        const decoded = jwt.verify(
-            token,
-            env.JWT_SECRET
-        );
+        const decoded = verifyAccessToken(token);
+
 
         const user = await User.findOne({
             where: {
-                uniqueId: decoded.uniqueId
-            }
+                uniqueId: decoded.uniqueId,
+                deletedAt: null
+            },
+
+            attributes: [
+                "uniqueId",
+                "email"
+            ]
         });
 
+
         if (!user) {
-            return next(
-                apiError(
-                    HTTP.UNAUTHORIZED,
-                    messages.UNAUTHORIZED
-                )
-            );
+            return res.status(401).json({
+                message: "User not found"
+            });
         }
+
 
         req.user = user;
 
+
         next();
-    } catch (error) {
-        return next(
-            apiError(
-                HTTP.UNAUTHORIZED,
-                messages.INVALID_TOKEN
-            )
-        );
+
+
     }
+    catch (error) {
+
+        next(error);
+
+    }
+
 };
+
+
+module.exports = authenticate;

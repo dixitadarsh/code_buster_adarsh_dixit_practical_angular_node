@@ -36,6 +36,10 @@ module.exports = (sequelize) => {
                 type: DataTypes.TEXT,
                 allowNull: true,
             },
+            deletedAt: {
+                type: DataTypes.DATE,
+                allowNull: true,
+            }
         },
         {
             tableName: "users",

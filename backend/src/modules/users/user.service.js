@@ -21,13 +21,28 @@ exports.create = async (payload) => {
         password: hashedPassword,
     });
 
-    user.password = undefined;
+    const userResponse = user.toJSON();
 
-    return user;
+    delete userResponse.password;
+    delete userResponse.refreshToken;
+
+    return userResponse;
 };
 
-exports.findAll = async () => {
-    return await userRepository.findAll();
+exports.findAll = async (query = {}) => {
+
+    const {
+        page = 1,
+        limit = 10
+    } = query;
+
+    
+
+    return userRepository.findAll({
+        page,
+        limit
+    });
+
 };
 
 exports.findByUniqueId = async (uniqueId) => {
@@ -37,9 +52,12 @@ exports.findByUniqueId = async (uniqueId) => {
         throw apiError(HTTP.NOT_FOUND, messages.USER_NOT_FOUND);
     }
 
-    user.password = undefined;
+    const userResponse = user.toJSON();
 
-    return user;
+    delete userResponse.password;
+    delete userResponse.refreshToken;
+
+    return userResponse;
 };
 
 exports.update = async (uniqueId, payload) => {
@@ -53,11 +71,29 @@ exports.update = async (uniqueId, payload) => {
         payload.password = await hashPassword(payload.password, 10);
     }
 
+    if (payload.email) {
+
+        const existingUser =
+            await userRepository.findByEmail(payload.email);
+
+
+        if (existingUser && existingUser.uniqueId !== uniqueId) {
+            throw apiError(
+                HTTP.CONFLICT,
+                messages.EMAIL_EXISTS
+            );
+        }
+
+    }
+
     const updatedUser = await userRepository.update(uniqueId, payload);
 
-    updatedUser.password = undefined;
+    const userResponse = user.toJSON();
 
-    return updatedUser;
+    delete userResponse.password;
+    delete userResponse.refreshToken;
+
+    return userResponse;
 };
 
 exports.delete = async (uniqueId) => {

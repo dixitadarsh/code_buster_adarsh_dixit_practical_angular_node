@@ -25,13 +25,17 @@ module.exports = {
     CATEGORY_CREATED: "Category created successfully.",
     CATEGORY_UPDATED: "Category updated successfully.",
     CATEGORY_DELETED: "Category deleted successfully.",
+    CATEGORY_EXISTS: "Category already exists",
     CATEGORY_NOT_FOUND: "Category not found.",
 
     // Product
-    PRODUCT_CREATED: "Product created successfully.",
-    PRODUCT_UPDATED: "Product updated successfully.",
-    PRODUCT_DELETED: "Product deleted successfully.",
-    PRODUCT_NOT_FOUND: "Product not found.",
+    PRODUCT_CREATED: "Product created successfully",
+    PRODUCT_UPDATED: "Product updated successfully",
+    PRODUCT_DELETED: "Product deleted successfully",
+    PRODUCT_EXISTS: "Product already exists",
+    PRODUCT_NOT_FOUND: "Product not found",
+    PRODUCTS_IMPORTED: "Products imported successfully.",
+    PRODUCTS_EXPORTED: "Products exported successfully.",
 
     // Validation
     VALIDATION_ERROR: "Validation failed.",

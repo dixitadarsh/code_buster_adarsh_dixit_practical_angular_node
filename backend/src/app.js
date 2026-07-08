@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
+const path = require("path");
 
 const logger = require("./utils/logger");
 const security = require("./config/security");
@@ -17,6 +18,8 @@ const requestLoggerMiddleware = require("./middleware/requestLogger.middleware")
 =============================================*/
 const authRoutes = require("./modules/auth/auth.routes");
 const userRoutes = require("./modules/users/user.routes");
+const categoryRoutes = require("./modules/categories/category.routes");
+const productRoutes = require("./modules/products/product.routes");
 
 
 const app = express();
@@ -42,9 +45,21 @@ app.use(requestLoggerMiddleware);
 // Response Helper
 app.use(responseMiddleware);
 
+
+
+app.use(
+    "/uploads",
+    express.static(
+        path.join(process.cwd(), "uploads")
+    )
+);
+
+
 // After response middleware
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/categories", categoryRoutes);
+app.use("/api/v1/products", productRoutes);
 
 // Health Check
 app.get("/", (req, res) => {

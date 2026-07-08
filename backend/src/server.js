@@ -21,17 +21,17 @@ startServer();
 
 // Graceful Shutdown
 process.on("SIGINT", () => {
-    console.log("\nShutting down server...");
+    logger.info("\nShutting down server...");
     server.close(() => {
-        console.log("Server stopped.");
+        logger.info("Server stopped.");
         process.exit(0);
     });
 });
 
 process.on("SIGTERM", () => {
-    console.log("\nSIGTERM received. Closing server...");
+    logger.info("\nSIGTERM received. Closing server...");
     server.close(() => {
-        console.log("Server stopped.");
+        logger.info("Server stopped.");
         process.exit(0);
     });
 });

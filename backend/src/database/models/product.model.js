@@ -21,10 +21,14 @@ module.exports = (sequelize) => {
             categoryId: {
                 type: DataTypes.INTEGER,
                 allowNull: false,
+
                 references: {
                     model: "categories",
                     key: "id",
                 },
+
+                onUpdate: "CASCADE",
+                onDelete: "RESTRICT",
             },
 
             name: {
@@ -49,6 +53,10 @@ module.exports = (sequelize) => {
                     min: 0,
                 },
             },
+            deletedAt: {
+                type: DataTypes.DATE,
+                allowNull: true,
+            }
         },
         {
             tableName: "products",

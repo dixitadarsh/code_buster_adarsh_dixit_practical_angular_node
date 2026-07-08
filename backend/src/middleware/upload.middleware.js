@@ -1,3 +1,10 @@
-const upload = require("../config/multer");
+const {
+    imageUpload,
+    bulkUpload,
+} = require("../config/multer");
 
-exports.productImage = upload.single("image");
+exports.productImage =
+    imageUpload.single("image");
+
+exports.productBulkFile =
+    bulkUpload.single("file");

@@ -27,6 +27,10 @@ module.exports = (sequelize) => {
                     len: [2, 255],
                 },
             },
+            deletedAt: {
+                type: DataTypes.DATE,
+                allowNull: true,
+            }
         },
         {
             tableName: "categories",
