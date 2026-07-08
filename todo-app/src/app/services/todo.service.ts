@@ -8,37 +8,21 @@ export class TodoStore {
     private readonly STORAGE_KEY = 'todos';
 
     // ── Core state (Signals) ──────────────────────────────────────
-    // BehaviorSubject ki jagah ab seedha signal() — yeh khud hi current
-    // value yaad rakhta hai, .getValue() jaisa kuch ki zaroorat nahi,
-    // seedha todosSignal() call karo to current value mil jaata hai.
+    
     private readonly todosSignal = signal<Todo[]>(this.loadTodos());
 
-    // Search term ke liye plain signal — Subject ki tarah "stream of events"
-    // nahi chahiye tha, hume sirf "current search text" chahiye tha, jo
-    // signal khud provide karta hai.
     private readonly searchTermSignal = signal<string>('');
 
-    // Filters bhi plain signals — null matlab "no filter applied"
     private readonly statusFilterSignal = signal<Status | null>(null);
     private readonly priorityFilterSignal = signal<Priority | null>(null);
 
-    // ── Public read-only signals (components sirf yeh read kar sakte hain) ──
-    // asReadonly() = BehaviorSubject ke asObservable() jaisa hi role —
-    // components ko sirf read access, write sirf is service ke methods se.
+    // ── Readonly signals (public API) ───────────────────────────
     readonly todos = this.todosSignal.asReadonly();
     readonly searchTerm = this.searchTermSignal.asReadonly();
     readonly statusFilter = this.statusFilterSignal.asReadonly();
     readonly priorityFilter = this.priorityFilterSignal.asReadonly();
 
     // ── Computed signals (derived state) ──────────────────────────
-    // computed() = RxJS ke map()/combineLatest() ka Signal equivalent.
-    // Yeh automatically re-run hota hai jab bhi todosSignal, searchTermSignal,
-    // statusFilterSignal, ya priorityFilterSignal mein se koi bhi change ho —
-    // Angular khud dependency track karta hai, kyunki hum unko andar () se call kar rahe hain.
-    //
-    // Pehle wali RxJS file mein `combinedFilteredTodos$` actually filter
-    // apply nahi kar raha tha (tap() ka return value discard ho jaata tha) —
-    // yahan woh bug nahi hai, seedha filtered result return ho raha hai.
     readonly filteredTodos = computed(() => {
         const search = this.searchTermSignal().toLowerCase().trim();
         const status = this.statusFilterSignal();
@@ -55,11 +39,6 @@ export class TodoStore {
         });
     });
 
-    // Statistics — pehle ek plain method thi jo sirf "on-demand" snapshot
-    // deti thi, template mein live update nahi hoti thi jab tak manually
-    // call na karo. Ab computed() se yeh khud-ba-khud reactive hai — jab
-    // bhi todos change hongi, statistics automatically update ho jayengi
-    // template mein bina kuch extra kiye.
     readonly statistics = computed(() => {
         const todos = this.todosSignal();
         return {
@@ -72,11 +51,6 @@ export class TodoStore {
 
     // ── Mutation methods (state ko change karne ka sirf yahi tareeka) ──
 
-    /**
-     * Naya todo add karta hai. BehaviorSubject.next() ki jagah
-     * ab todosSignal.update() — dono ka kaam same hai: current
-     * value lo, naya array banao, state update karo.
-     */
     addTodo(payload: CreateTodoPayload): void {
         const newTodo: Todo = {
             id: this.generateId(),
@@ -90,12 +64,6 @@ export class TodoStore {
         this.saveTodos(this.todosSignal());
     }
 
-    /**
-     * Existing todo update karta hai id se match karke.
-     * Immutable update — naya array banate hain (map se), purane
-     * ko mutate nahi karte, taaki Angular ka change detection
-     * reliably naya reference dekh sake.
-     */
     updateTodo(id: string, payload: UpdateTodoPayload): void {
         this.todosSignal.update((list) =>
             list.map((todo) =>
@@ -107,45 +75,38 @@ export class TodoStore {
         this.saveTodos(this.todosSignal());
     }
 
-    /** Todo delete karta hai id se. */
+    
     deleteTodo(id: string): void {
         this.todosSignal.update((list) => list.filter((todo) => todo.id !== id));
         this.saveTodos(this.todosSignal());
     }
 
-    /**
-     * Id se ek todo dhundhta hai — synchronous, seedha
-     * todosSignal() call karke current array mein find karo.
-     * Pehle isके liye ek separate `allTodos` mirror array
-     * maintain karna padta tha (constructor mein subscribe karke) —
-     * signals ke saath uski zaroorat hi nahi, seedha todosSignal()
-     * hi current value hai.
-     */
+    
     getTodoById(id: string): Todo | undefined {
         return this.todosSignal().find((todo) => todo.id === id);
     }
 
-    /** Search term set karta hai — filteredTodos computed khud update ho jayega. */
+    
     setSearchTerm(term: string): void {
         this.searchTermSignal.set(term);
     }
 
-    /** Status filter set/clear karta hai. */
+    
     setStatusFilter(status: Status | null): void {
         this.statusFilterSignal.set(status);
     }
 
-    /** Priority filter set/clear karta hai. */
+    
     setPriorityFilter(priority: Priority | null): void {
         this.priorityFilterSignal.set(priority);
     }
 
-    /** Convenience wrapper: todo ko completed mark karo. */
+    
     markAsCompleted(id: string): void {
         this.updateTodo(id, { status: 'completed' });
     }
 
-    /** Convenience wrapper: todo ko in-progress mark karo. */
+    
     markAsInProgress(id: string): void {
         this.updateTodo(id, { status: 'in-progress' });
     }

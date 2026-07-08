@@ -7,7 +7,7 @@ const connectDatabase = require("./database");
 const logger = require("./utils/logger");
 const env = require("./config/env");
 
-const PORT = env.PORT || 5000;
+const PORT = env.PORT || 3000;
 
 const startServer = async () => {
   await connectDatabase();

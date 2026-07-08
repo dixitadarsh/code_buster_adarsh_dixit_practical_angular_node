@@ -42,7 +42,7 @@ export class DashboardComponent {
 
     readonly currentPage = signal(1);
 
-    readonly itemsPerPage = signal(8);
+    readonly itemsPerPage = signal(4);
 
 
 
